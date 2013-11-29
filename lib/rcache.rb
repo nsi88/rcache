@@ -2,6 +2,8 @@ require "rcache/version"
 require "json"
 require "rcache/query_cache"
 require "rcache/query_methods"
+require "rcache/relation"
+require "rcache/association"
 
 module Rcache
   class << self

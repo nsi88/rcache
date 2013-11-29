@@ -1,19 +1,10 @@
 module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module QueryCache
-      attr_reader :redis_query_cache_enabled
-
-      def enable_redis_query_cache!(options = {})
-        @redis_query_cache_enabled = true
-        @redis_query_cache_options = options
-      end
-
-      def disable_redis_query_cache!
-        @redis_query_cache_enabled = false
-      end
+      attr_accessor :rcache_value
 
       def select_all(arel, name = nil, binds = [])
-        if @redis_query_cache_enabled && !locked?(arel)
+        if @rcache_value && !locked?(arel)
           sql = to_sql(arel, binds)
           redis_cache_sql(sql, binds) { super(sql, name, binds) }
         elsif @query_cache_enabled && !locked?(arel)
@@ -28,7 +19,7 @@ module ActiveRecord
 
       def redis_cache_sql(sql, binds)
         [:redis, :expires_in, :log_cached_queries].each do |attr|
-          instance_variable_set("@#{attr}", @redis_query_cache_options.has_key?(attr) ? @redis_query_cache_options[attr] : Rcache.send(attr))
+          instance_variable_set("@#{attr}", @rcache_value.has_key?(attr) ? @rcache_value[attr] : Rcache.send(attr))
         end
 
         result =

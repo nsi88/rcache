@@ -11,16 +11,8 @@ module ActiveRecord
     alias :super_build_arel :build_arel
 
     def build_arel
-      if @rcache_value
-        old = connection.redis_query_cache_enabled
-        connection.enable_redis_query_cache!(@rcache_value)
-      end
-      begin
-        res = super_build_arel
-      ensure
-        connection.disable_redis_query_cache! if @rcache_value && !old
-      end
-      res
+      connection.rcache_value = @rcache_value
+      super_build_arel
     end
   end
 end
