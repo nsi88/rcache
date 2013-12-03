@@ -18,7 +18,7 @@ module ActiveRecord
       private
 
       def redis_cache_sql(sql, binds)
-        [:redis, :expires_in, :log_cached_queries].each do |attr|
+        [:redis, :expires_in, :log_cached_queries, :key_prefix].each do |attr|
           instance_variable_set("@#{attr}", @rcache_value.has_key?(attr) ? @rcache_value[attr] : Rcache.send(attr))
         end
 
@@ -28,19 +28,22 @@ module ActiveRecord
             ActiveSupport::Notifications.instrument("sql.active_record", :sql => sql, :binds => binds, :name => "CACHE", :connection_id => object_id) if @log_cached_queries
             @query_cache[sql][binds]
           # write to memory from redis and return
-          elsif res = (JSON.parse(@redis.hget(sql, binds.to_s)) rescue nil)
+          elsif res = (JSON.parse(@redis.get(redis_cache_key(sql, binds, @key_prefix))) rescue nil)
             ActiveSupport::Notifications.instrument("sql.active_record", :sql => sql, :binds => binds, :name => "REDIS", :connection_id => object_id) if @log_cached_queries
             @query_cache[sql][binds] = res
           # write to memory and redis from db and return
           else
             res = yield
             @query_cache[sql][binds] = res
-            @redis.hset(sql, binds.to_s, res.to_json)
-            @redis.expire(sql, @expires_in)
+            @redis.setex(redis_cache_key(sql, binds, @key_prefix), @expires_in, res.to_json)
             res
           end
 
         result.collect { |row| row.dup }
+      end
+
+      def redis_cache_key(sql, binds, key_prefix)
+        key_prefix + Digest::MD5.hexdigest(sql + binds.to_s)
       end
     end
   end

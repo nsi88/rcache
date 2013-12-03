@@ -1,5 +1,6 @@
 require "rcache/version"
 require "json"
+require "digest/md5"
 require "rcache/query_cache"
 require "rcache/query_methods"
 require "rcache/relation"
@@ -9,7 +10,7 @@ require "rcache/preloader"
 
 module Rcache
   class << self
-    attr_accessor :redis, :expires_in, :log_cached_queries
+    attr_accessor :redis, :expires_in, :log_cached_queries, :key_prefix
 
     def configure
       yield self
@@ -18,4 +19,5 @@ module Rcache
 
   self.expires_in = 60
   self.log_cached_queries = true
+  self.key_prefix = 'rcache::'
 end
