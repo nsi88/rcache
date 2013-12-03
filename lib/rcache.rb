@@ -5,6 +5,7 @@ require "rcache/query_methods"
 require "rcache/relation"
 require "rcache/association"
 require "rcache/querying"
+require "rcache/preloader"
 
 module Rcache
   class << self
