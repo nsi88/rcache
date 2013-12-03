@@ -7,7 +7,7 @@ module ActiveRecord
         if @rcache_value && !locked?(arel)
           sql = to_sql(arel, binds)
           redis_cache_sql(sql, binds) { super(sql, name, binds) }
-        elsif @query_cache_enabled && !locked?(arel)
+        elsif @query_cache_enabled && !locked?(arel) && (@rcache_value[:expires_in] || Rcache.expires_in).to_i > 0
           sql = to_sql(arel, binds)
           cache_sql(sql, binds) { super(sql, name, binds) }
         else
