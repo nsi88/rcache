@@ -4,10 +4,10 @@ module ActiveRecord
       attr_accessor :rcache_value
 
       def select_all(arel, name = nil, binds = [])
-        if @rcache_value && !locked?(arel)
+        if @rcache_value && !locked?(arel) && (@rcache_value[:expires_in] || Rcache.expires_in).to_i > 0
           sql = to_sql(arel, binds)
           redis_cache_sql(sql, binds) { super(sql, name, binds) }
-        elsif @query_cache_enabled && !locked?(arel) && (@rcache_value[:expires_in] || Rcache.expires_in).to_i > 0
+        elsif @query_cache_enabled && !locked?(arel)
           sql = to_sql(arel, binds)
           cache_sql(sql, binds) { super(sql, name, binds) }
         else
