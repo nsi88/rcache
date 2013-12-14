@@ -1,6 +1,6 @@
 # Rcache
 
-TODO: Write a gem description
+Caches activerecord query results to memory and redis
 
 ## Installation
 
@@ -16,9 +16,28 @@ Or install it yourself as:
 
     $ gem install rcache
 
+In your initializers:
+
+  Rcache.configure do |config|
+    config.redis = <your connect to redis>
+  end
+
+Optional settings:
+
+1. expires_in (default 60)
+2. log_cached_queries (default true)
+3. key_prefix (default rcache::)
+
+
 ## Usage
 
-TODO: Write usage instructions here
+Cache find result for 60 seconds:
+
+  Client.rcache.find(2)
+
+Cache where results with includes for 10 seconds and not show cached queries in log:
+
+  Event.limit(2).includes(:thumbnails, :type => :variable).rcache(:expires_in => 10.seconds, :log_cached_queries => false)
 
 ## Contributing
 
