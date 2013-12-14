@@ -18,9 +18,9 @@ Or install it yourself as:
 
 In your initializers:
 
-  Rcache.configure do |config|
-    config.redis = <your connect to redis>
-  end
+    Rcache.configure do |config|
+        config.redis = <your connect to redis>
+    end
 
 Optional settings:
 
@@ -33,11 +33,11 @@ Optional settings:
 
 Cache find result for 60 seconds:
 
-  Client.rcache.find(2)
+    Client.rcache.find(2)
 
 Cache where results with includes for 10 seconds and not show cached queries in log:
 
-  Event.limit(2).includes(:thumbnails, :type => :variable).rcache(:expires_in => 10.seconds, :log_cached_queries => false)
+    Event.limit(2).includes(:thumbnails, :type => :variable).rcache(:expires_in => 10.seconds, :log_cached_queries => false)
 
 ## Contributing
 
