@@ -1,10 +1,14 @@
 module ActiveRecord
   class Relation
+    attr_accessor :rcache_value
+
     def exec_queries
       return @records if loaded?
   
       default_scoped = with_default_scope
   
+      arel.rcache_value = rcache_value
+
       if default_scoped.equal?(self)
         @records = if @readonly_value.nil? && !@klass.locking_enabled?
           eager_loading? ? find_with_associations : @klass.find_by_sql(arel, @bind_values)
@@ -18,7 +22,7 @@ module ActiveRecord
         preload +=  @includes_values unless eager_loading?
         preload.each do |associations|
           # this line distincts only
-          ActiveRecord::Associations::Preloader.new(@records, associations, :rcache_value => @klass.connection.rcache_value).run
+          ActiveRecord::Associations::Preloader.new(@records, associations, :rcache_value => rcache_value).run
         end
   
         # @readonly_value is true only if set explicitly. @implicit_readonly is true if there
@@ -28,7 +32,8 @@ module ActiveRecord
       else
         @records = default_scoped.to_a
       end
-  
+
+
       @loaded = true
       @records
     end

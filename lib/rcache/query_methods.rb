@@ -1,8 +1,9 @@
 module ActiveRecord
   module QueryMethods
     def rcache(opts = {})
-      connection.rcache_value = opts
-      self
+      relation = clone
+      relation.rcache_value = opts
+      relation
     end
   end
 end
