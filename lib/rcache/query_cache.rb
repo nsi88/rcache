@@ -2,7 +2,7 @@ module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module QueryCache
       def select_all(arel, name = nil, binds = [])
-        if arel.rcache_value && !locked?(arel) && (arel.rcache_value[:expires_in] || Rcache.expires_in).to_i > 0
+        if (arel.rcache_value rescue false) && !locked?(arel) && (arel.rcache_value[:expires_in] || Rcache.expires_in).to_i > 0
           sql = to_sql(arel, binds)
           redis_cache_sql(arel.rcache_value, sql, binds) { super(sql, name, binds) }
         elsif @query_cache_enabled && !locked?(arel)
