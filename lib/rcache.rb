@@ -7,6 +7,7 @@ require "rcache/relation"
 require "rcache/association"
 require "rcache/querying"
 require "rcache/preloader"
+require "rcache/arel"
 
 module Rcache
   class << self
