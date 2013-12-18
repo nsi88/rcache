@@ -1,12 +1,10 @@
 module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module QueryCache
-      attr_accessor :rcache_value
-
       def select_all(arel, name = nil, binds = [])
-        if @rcache_value && !locked?(arel) && (@rcache_value[:expires_in] || Rcache.expires_in).to_i > 0
+        if arel.rcache_value && !locked?(arel) && (arel.rcache_value[:expires_in] || Rcache.expires_in).to_i > 0
           sql = to_sql(arel, binds)
-          redis_cache_sql(sql, binds) { super(sql, name, binds) }
+          redis_cache_sql(arel.rcache_value, sql, binds) { super(sql, name, binds) }
         elsif @query_cache_enabled && !locked?(arel)
           sql = to_sql(arel, binds)
           cache_sql(sql, binds) { super(sql, name, binds) }
@@ -17,14 +15,14 @@ module ActiveRecord
 
       private
 
-      def redis_cache_sql(sql, binds)
+      def redis_cache_sql(rcache_value, sql, binds)
         [:redis, :expires_in, :log_cached_queries, :key_prefix].each do |attr|
-          instance_variable_set("@#{attr}", @rcache_value.has_key?(attr) ? @rcache_value[attr] : Rcache.send(attr))
+          instance_variable_set("@#{attr}", rcache_value.has_key?(attr) ? rcache_value[attr] : Rcache.send(attr))
         end
 
         result =
           # return from memory
-          if @query_cache[sql].key?(binds)
+          if @query_cache_enabled && @query_cache[sql].key?(binds)
             ActiveSupport::Notifications.instrument("sql.active_record", :sql => sql, :binds => binds, :name => "CACHE", :connection_id => object_id) if @log_cached_queries
             @query_cache[sql][binds]
           # write to memory from redis and return
