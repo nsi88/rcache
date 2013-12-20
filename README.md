@@ -39,6 +39,8 @@ Cache where results with includes for 10 seconds and not show cached queries in 
 
     Event.limit(2).includes(:thumbnails, :type => :variable).rcache(:expires_in => 10.seconds, :log_cached_queries => false)
 
+It supports only activerecord 3.2 so far
+
 ## Contributing
 
 1. Fork it
