@@ -1,5 +1,7 @@
 require "rcache/version"
 require "json"
+require "active_record"
+require "redis"
 require "digest/md5"
 require "rcache/query_cache"
 require "rcache/query_methods"
