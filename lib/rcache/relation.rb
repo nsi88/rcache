@@ -30,7 +30,7 @@ module ActiveRecord
         readonly = @readonly_value.nil? ? @implicit_readonly : @readonly_value
         @records.each { |record| record.readonly! } if readonly
       else
-        @records = default_scoped.to_a
+        @records = default_scoped.rcache(rcache_value).to_a
       end
 
 
