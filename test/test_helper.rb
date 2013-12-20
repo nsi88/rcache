@@ -4,6 +4,18 @@ require 'test/unit'
 require 'shoulda-context'
 require 'rcache'
 
+redis_config = YAML.load_file("config/redis.yml")['test'].symbolize_keys
+redis = Redis.new(
+  :host => redis_config[:host],
+  :port => redis_config[:port],
+  :db   => redis_config[:database],
+  :password => redis_config[:password]
+)
+Rcache.configure do |config|
+  config.redis = redis
+  config.expires_in = 10
+end
+
 MODELS = File.join(File.dirname(__FILE__), "models")
 $LOAD_PATH.unshift(MODELS)
 Dir[ File.join(MODELS, "*.rb") ].each do |model|
@@ -28,7 +40,7 @@ def setup_db
 
     create_table :quotes do |t|
       t.string :name
-      t.integer :client_id
+      t.integer :event_id
     end
   end
 end
@@ -45,4 +57,8 @@ def teardown_db
   ActiveRecord::Base.connection.tables.each do |table|
     ActiveRecord::Base.connection.drop_table(table)
   end
+end
+
+def teardown_redis
+  Rcache.redis.keys(Rcache.key_prefix + '*').each { |k| Rcache.redis.del k }
 end
