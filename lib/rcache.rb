@@ -10,6 +10,7 @@ require "rcache/association"
 require "rcache/querying"
 require "rcache/preloader"
 require "rcache/arel"
+require "rcache/calculations"
 
 module Rcache
   class << self

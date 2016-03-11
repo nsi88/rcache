@@ -35,6 +35,10 @@ Cache find result for 60 seconds:
 
     Client.rcache.find(2)
 
+Cache count results:
+
+    Client.rcache.count
+
 Cache where results with includes for 10 seconds and not show cached queries in log:
 
     Event.limit(2).includes(:thumbnails, :type => :variable).rcache(:expires_in => 10.seconds, :log_cached_queries => false)
